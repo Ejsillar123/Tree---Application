@@ -1,0 +1,114 @@
+import java.util.*;
+
+class Person {
+    String name;
+    Person parent;
+    List<Person> children;
+
+    public Person(String name) {
+        this.name = name;
+        this.children = new ArrayList<>();
+    }
+
+    public void addChild(Person child) {
+        child.parent = this;
+        this.children.add(child);
+    }
+}
+
+public class FamilyTree {
+    private static Person root;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("\n=== Family Tree Application ===");
+            System.out.println("1. Add Member");
+            System.out.println("2. Display Family Tree");
+            System.out.println("3. Search Member");
+            System.out.println("4. Exit");
+            System.out.print("Choose an option: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    addMember(scanner);
+                    break;
+                case 2:
+                    displayTree(root, 0);
+                    break;
+                case 3:
+                    searchMember(scanner);
+                    break;
+                case 4:
+                    System.out.println("Exiting application...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+            }
+        }
+    }
+
+    private static void addMember(Scanner scanner) {
+        System.out.print("Enter name: ");
+        String name = scanner.nextLine();
+        Person newMember = new Person(name);
+
+        if (root == null) {
+            root = newMember;
+            System.out.println(name + " added as the root of the family tree.");
+        } else {
+            System.out.print("Enter parent's name: ");
+            String parentName = scanner.nextLine();
+            Person parent = findPerson(root, parentName);
+
+            if (parent != null) {
+                parent.addChild(newMember);
+                System.out.println(name + " added as a child of " + parentName + ".");
+            } else {
+                System.out.println("Parent not found. Member not added.");
+            }
+        }
+    }
+
+    private static void displayTree(Person person, int level) {
+        if (person == null) return;
+
+        for (int i = 0; i < level; i++) System.out.print("  ");
+        System.out.println("- " + person.name);
+
+        for (Person child : person.children) {
+            displayTree(child, level + 1);
+        }
+    }
+
+    private static void searchMember(Scanner scanner) {
+        System.out.print("Enter name to search: ");
+        String name = scanner.nextLine();
+        Person found = findPerson(root, name);
+
+        if (found != null) {
+            System.out.println("Member found: " + found.name);
+            System.out.println("Parent: " + (found.parent != null ? found.parent.name : "None"));
+            System.out.println("Children: " + (found.children.isEmpty() ? "None" : ""));
+            for (Person child : found.children) {
+                System.out.println("- " + child.name);
+            }
+        } else {
+            System.out.println("Member not found.");
+        }
+    }
+
+    private static Person findPerson(Person current, String name) {
+        if (current == null) return null;
+        if (current.name.equalsIgnoreCase(name)) return current;
+
+        for (Person child : current.children) {
+            Person found = findPerson(child, name);
+            if (found != null) return found;
+        }
+        return null;
+    }
+}
